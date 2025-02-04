@@ -1,0 +1,25 @@
+{
+    "visual":{
+    "name":"barAndLineChartWithTable",
+    "displayName":"Bar and Line Chart with Table",
+    "guid":"barAndLineChartWithTableC51A8F083FFA4AD1B56D590728B72F84",
+    "visualClassName":"Visual",
+    "version":"1.0.0.0",
+    "description":"Bar and Line Chart with Table",
+    "supportUrl":"https://community.powerbi.com",
+    "gitHubUrl":""},
+    "apiVersion":"5.3.0",
+    "author":{
+        "name":"Kishore Kadhirvelu",
+        "email":"kishorekthilak@gmail.com"
+    },
+    "assets":{
+        "icon":"assets/icon.png"
+    },
+    "externalJS":null,
+    "style":"style/visual.less",
+    "capabilities":"capabilities.json",
+    "dependencies":null,
+    "stringResources":[],
+    "version":"1.0.0.0"
+}

@@ -1,0 +1,185 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Category",
+            "name": "category",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Bar Values",
+            "name": "Bars",
+            "kind": "Measure"
+        },
+        {   
+            "displayName": "Line Values",
+            "name": "Lines",
+            "kind": "Measure"
+        } 
+    ],
+    "objects": {
+        "tableData": {
+            "properties": {
+                "categoryProperty": {
+                    "type":{
+                        "enumeration": []
+                    }
+                },
+                "showSeries": {
+                    "type":{
+                        "bool": true
+                    }
+                },
+                "displayUnitsProperty": {
+                    "type":
+                    {
+                        "formatting": {
+                            "labelDisplayUnits": true
+                        }
+                    }
+                },
+                "fontSize": { 
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "fontFamily": {
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "fontBold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontUnderline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontItalic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "barData": {
+            "properties": {
+                "categoryProperty": {
+                    "type":{
+                        "enumeration": []
+                    }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "transparency": {
+                    "type": {
+                         "numeric": true
+                    }
+                },
+                "yAxisMin": {
+                    "type": {
+                         "numeric": true
+                    }
+                },
+                "yAxisMax": {
+                    "type": {
+                         "numeric": true
+                    }
+                },
+                "dataLabels":{
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "lineData": {
+            "properties": {
+                "categoryProperty": {
+                    "type":{
+                        "enumeration": []
+                    }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "category": {
+                        "max": 1
+                    },
+                    "Bars": { 
+                        "min": 0,
+                        "max": 10 
+                    },
+                    "Lines": { 
+                        "min": 0,
+                        "max": 10
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "category"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {}
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "Bars"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "Lines"
+                            }
+                        }
+                    ]
+
+                }
+            }
+        }
+    ],
+    "supportsHighlight": false,
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "privileges": []
+}

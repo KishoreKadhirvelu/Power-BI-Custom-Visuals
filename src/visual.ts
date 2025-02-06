@@ -639,25 +639,23 @@ export class Visual implements IVisual {
                         }
                     }
                 },
-                this.getFormattingSlice(powerbi.visuals.FormattingComponent.ColorPicker, "table_dataDesign_fontColor_slice", "Color", "tableData", "fontColor", tableFormatOptionsSelector, { value: this.tableFontColor })
-                ])
+                this.getFormattingSlice(powerbi.visuals.FormattingComponent.ColorPicker, "table_dataDesign_fontColor_slice", "Color", "tableData", "fontColor", tableFormatOptionsSelector, { value: this.tableFontColor })])
         tableFormattingGroup['disabled'] = this.tableSelectedCategory === "0" ? false : !this.filterProperty("queryName", this.tableQueryName)[0].tableSelection
         let table2_dataFont = tableFormattingGroup
 
         const borderThickness = this.getFormattingSlice(powerbi.visuals.FormattingComponent.Slider, "border_Thickness_uid", "Thickness", "tableData", "borderThickness", null, this.tableBorderThickness)
         const borderThicknessProperties = {
-            unitSymbol: "px",
-            unitSymbolAfterInput: false,
             minValue: {
                 type: powerbi.visuals.ValidatorType.Min,
-                value: 1,
+                value: 0,
             },
             maxValue: {
                 type: powerbi.visuals.ValidatorType.Max,
                 value: 100,
             }
         }
-        borderThickness['options'] = borderThicknessProperties as powerbi.visuals.NumUpDownFormat
+        borderThickness['control']['properties']['options'] = borderThicknessProperties as powerbi.visuals.NumUpDownFormat
+        console.log(borderThickness)
         let table3_dataFont = this.getFormattingGroup("Border", "options_table_group_uid", 
                 [borderThickness,
                  this.getFormattingSlice(powerbi.visuals.FormattingComponent.ColorPicker, "table_borderColor_slice", "Color", "tableData", "borderColor", null, { value: this.tableBorderColor })])
@@ -680,7 +678,7 @@ export class Visual implements IVisual {
                 value: 100,
             }
         }
-        barTransparency['options'] = barTransparencyProperties as powerbi.visuals.NumUpDownFormat
+        barTransparency['control']['properties']['options'] = barTransparencyProperties as powerbi.visuals.NumUpDownFormat
         const barColor = this.getFormattingSlice(powerbi.visuals.FormattingComponent.ColorPicker, "bar_color_uid", "Color", "barData", "fontColor", barFormatOptionsSelector, { value: this.barColor })
         barColor['disabled'] = this.barSelectedCategory === "0" ? true : false
         let bar2_dataFont =

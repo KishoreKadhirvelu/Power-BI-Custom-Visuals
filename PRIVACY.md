@@ -10,9 +10,7 @@ This Visual operates entirely within the user's Power BI workspace, processing a
 
 **No Usage Data: The Visual does not track or collect any information about its usage, including feature interactions or usage frequency.**
 
-**No Data Transmission: The Visual does not transmit any data to external servers or third-party services. All processing occurs locally within the user's Power BI session.**
-
-**This Visual uses the D3.js JavaScript library for data visualization. The library runs entirely within the user's web browser, rendering data provided by Power BI locally. The Visual does not initiate network requests for D3.js beyond normal browser loading of the library.**
+**No Data Transmission: The Visual does not transmit any data to external servers or third-party services. All processing occurs locally within the user's Power BI session. This Visual uses the D3.js JavaScript library for data visualization. The library runs entirely within the user's web browser, rendering data provided by Power BI locally. The Visual does not initiate network requests for D3.js beyond normal browser loading of the library.**
 
 
 **Microsoft's Data Collection:**
@@ -30,4 +28,5 @@ We may update this Privacy Statement periodically. Any changes will be posted on
 **Contact Us:**
 
 If you have any questions or concerns regarding this Privacy Statement, please contact us at:
+
 📧 Email: kishorekthilak@gmail.com

@@ -84,6 +84,7 @@ export class Visual implements IVisual {
         this.legend = legend.createLegend(this.target, false, 0);
         this.selectionIdBuilder = options.host.createSelectionIdBuilder();
         this.selectionManager = options.host.createSelectionManager();
+        this.handleContextMenu();
         this.svg = d3.select(this.target)
             .append('svg')
         this.container = this.svg
@@ -109,9 +110,18 @@ export class Visual implements IVisual {
             this.removeElements()
             const selectedSettings = options.dataViews[0].metadata.objects
             const getData = options.dataViews[0].categorical;
-            const allCategories = getData.categories[0].values
+            let allCategories = getData.categories[0].values
             const allValues = getData.values
 
+            //Handling Blank/Null values in category
+            allCategories = allCategories.map(item => {
+                if(item === null){
+                    item = allCategories.includes('(Blank)') ? ' (Blank)' : '(Blank)'
+                }
+                return item
+            })
+
+            //Fetching property values
             this.allProperties = []
             const fontSizeAll = this.getProperty<number>(selectedSettings, "tableData", "fontSize", 12)
             const fontFamilyAll = this.getProperty<string>(selectedSettings, "tableData", "fontFamily", "wf_standard-font, helvetica, arial, sans-serif")
@@ -140,7 +150,7 @@ export class Visual implements IVisual {
                     lineColor: this.getProperty<string>(currentValue,"lineData", "fontColor", this.lineColors[i]) ===  this.lineColors[i] ?  this.lineColors[i] : currentValue.lineData.fontColor['solid'].color,
                     tableSelection: this.getProperty<boolean>(currentValue,"tableData", "showSeries", true),
                     data: label.values,
-                    category: allCategories.map(item => item === null ? "(Blank)" : item),
+                    category: allCategories,
                     role: label.source.roles["Bars"] ? "Bars" : "Lines"
                     //marker: dataPoints[i].role === "Bars" ? MarkerShape.square : MarkerShape.longDash
                 }
@@ -187,15 +197,18 @@ export class Visual implements IVisual {
             this.totalTableRows = this.filterProperty('tableSelection', true)
 
             //Bar Properties
-            this.barSelectedCategory = String(this.getProperty<string>(selectedSettings, "barData", "categoryProperty", "0"))
+            const barSelectedCategory = String(this.getProperty<string>(selectedSettings, "barData", "categoryProperty", "0"))
+            this.barSelectedCategory = Number(barSelectedCategory) > this.totalBars.length ? "0" : barSelectedCategory
             this.barQueryName = this.barSelectedCategory === "0" ? "All" : this.totalBars[Number(this.barSelectedCategory) - 1].queryName
 
             //Line Properties
-            this.lineSelectedCategory = String(this.getProperty<string>(selectedSettings, "lineData", "categoryProperty", "0"))
+            const lineSelectedCategory = String(this.getProperty<string>(selectedSettings, "lineData", "categoryProperty", "0"))
+            this.lineSelectedCategory = Number(lineSelectedCategory) > this.totalLines.length ? "0" : lineSelectedCategory
             this.lineQueryName = this.lineSelectedCategory === "0" ? "All" : this.totalLines[Number(this.lineSelectedCategory) - 1].queryName
 
             //Table Properties
-            this.tableSelectedCategory = String(this.getProperty<string>(selectedSettings, "tableData", "categoryProperty", "0"))
+            const tableSelectedCategory = String(this.getProperty<string>(selectedSettings, "tableData", "categoryProperty", "0"))
+            this.tableSelectedCategory = Number(tableSelectedCategory) > this.totalBars.length + this.totalLines.length ? "0" : tableSelectedCategory
             this.tableQueryName = this.tableSelectedCategory === "0" ? "All" : this.allProperties[Number(this.tableSelectedCategory) - 1].queryName
             this.tableBorderColor = this.getProperty<string>(selectedSettings, "tableData", "borderColor", "#808080") ===  "#808080" ?  "#808080" : selectedSettings.tableData.borderColor['solid'].color
             this.tableBorderThickness = this.getProperty<number>(selectedSettings, "tableData", "borderThickness", 1)
@@ -267,6 +280,7 @@ export class Visual implements IVisual {
 
             let width: number = options.viewport.width
             let height: number = options.viewport.height - ((this.totalTableRows.length + 1) * maxFontSize * offSet);
+            const widthOffset = 10
 
             if (width < 125 || height < 125) {
                 this.removeElements()
@@ -276,9 +290,8 @@ export class Visual implements IVisual {
             this.target.style.overflow = 'hidden'
             const categoryLength: number = allCategories.length * 60
             if (width < categoryLength) {
-                this.target.style.overflowX = 'scroll'
+                this.target.style.overflow = 'scroll'
                 width = categoryLength
-                height = height - 15
             }
 
             this.svg
@@ -289,7 +302,7 @@ export class Visual implements IVisual {
             //XAxis
             const xScale = d3.scaleBand()
                 .domain(this.allProperties[0].category)
-                .range([0, width - (this.margin.left * 3)])
+                .range([0, width - (this.margin.left * 2) - widthOffset])
 
             const yScale = d3.scaleLinear()
                 .domain([minValue, maxValue])
@@ -301,7 +314,7 @@ export class Visual implements IVisual {
                         .tickFormat(d => {
                             let labelFormat: LabelFormattedTextOptions = {
                                 label: d,
-                                fontSize: 12,
+                                fontSize: 10,
                                 maxWidth: xScale.bandwidth()
                             };
                             return dataLabelUtils.getLabelFormattedText(labelFormat)
@@ -309,9 +322,9 @@ export class Visual implements IVisual {
                 .style('display', 'block')
             
             xAxis.selectAll("text")
-                .style('font-Size', '12px')
+                 .style('font-Size', '10px')
             xAxis.selectAll(".tick line, path")
-                .remove()
+                 .remove()
             
             //YAxis
             const yAxis = this.yAxis
@@ -329,6 +342,7 @@ export class Visual implements IVisual {
             const barBandwidth: number = (xScale.bandwidth() - padding) / this.totalBars.length;
             this.filterProperty('role', "Bars").forEach(bar => {
                 const data:IDataPoint[] = this.getDataPoints(bar)
+                const category = this.filterProperty("queryName", bar.queryName, this.categorySelection)
                 this.container
                     .selectAll('bar')
                     .data(data)
@@ -366,9 +380,7 @@ export class Visual implements IVisual {
                     .style('fill', bar.barColor)
                     .attr('fill-opacity', (100 - bar.barTransparency) / 100)
                     .on("click", (e, d) => {
-                        const category = this.filterProperty("queryName", bar.queryName, this.categorySelection)
-                        const index = allCategories.indexOf(d['name'])
-                        const categorySelection = category[index]
+                        const categorySelection = category[allCategories.indexOf(d['name'])]
                         this.handleClick(categorySelection.selection, bar.displayName)
                         e.stopImmediatePropagation()
                     })
@@ -385,6 +397,10 @@ export class Visual implements IVisual {
                             isTouchEvent: false,
                             identities: bar.selection
                         })
+                    })
+                    .on('contextmenu', (e, d) => {
+                        const categorySelection = category[allCategories.indexOf(d['name'])]
+                        this.handleContextMenu(categorySelection.selection)
                     })
                 currentBarBandwidth = currentBarBandwidth + barBandwidth
             })
@@ -423,13 +439,6 @@ export class Visual implements IVisual {
                     .style('fill', 'none')
                     .attr("stroke-dasharray", "10, 2")
                 })
-                /*.on("click", (e, d) => {
-                    const category = this.filterProperty("queryName", line.queryName, this.categorySelection) 
-                    const index = allCategories.indexOf(d['value'])
-                    const categorySelection = category[index]
-                    this.handleClick(categorySelection.selection, line.displayName)
-                    e.stopImmediatePropagation()
-                }) */
             })
 
             //Data Labels
@@ -477,7 +486,7 @@ export class Visual implements IVisual {
                 const marginTop: string = '25px'
                 const dataTable: HTMLElement = document.createElement('table')
                 const dataTableAttributes = {
-                    width: `${width - (this.margin.left * 3) + (this.margin.left * 2)}px`,
+                    width: `${width - widthOffset}px`,
                     marginTop: marginTop,
                     height: `${options.viewport.height - height - 20}px`
                 }
@@ -655,7 +664,6 @@ export class Visual implements IVisual {
             }
         }
         borderThickness['control']['properties']['options'] = borderThicknessProperties as powerbi.visuals.NumUpDownFormat
-        console.log(borderThickness)
         let table3_dataFont = this.getFormattingGroup("Border", "options_table_group_uid", 
                 [borderThickness,
                  this.getFormattingSlice(powerbi.visuals.FormattingComponent.ColorPicker, "table_borderColor_slice", "Color", "tableData", "borderColor", null, { value: this.tableBorderColor })])
@@ -688,7 +696,7 @@ export class Visual implements IVisual {
         const lineDropdown = this.getFormattingSlice(powerbi.visuals.FormattingComponent.Dropdown, "Series_line_uid", "Series", "lineData", "categoryProperty", null, this.lineSelectedCategory)
         lineDropdown['control']['properties']['mergeValues'] = lineDropDownCategories as powerbi.IEnumMember[]
         const lineColor = this.getFormattingSlice(powerbi.visuals.FormattingComponent.ColorPicker, "line_color_uid", "Color", "lineData", "fontColor", lineFormatOptionsSelector, { value: this.lineColor })
-        lineColor['disabled'] = this.lineSelectedCategory === "0" ? true : false
+        lineColor['disabled'] =  this.lineSelectedCategory === "0" ? true : false
         let line1_dataFont = this.getFormattingGroup("Apply settings to", "settings_line_group_uid", [lineDropdown])
         let line2_dataFont = this.getFormattingGroup("Color", "line_Properties_group_uid", [lineColor])
 
@@ -896,5 +904,16 @@ export class Visual implements IVisual {
 
     public getProperty<T>(objects, object, property, defaultValue): T {
         return typeof objects === "undefined" || typeof objects[object] === "undefined" || typeof objects[object][property] === "undefined" ? defaultValue : <T>objects[object][property]
+    }
+
+    private handleContextMenu(selectionID = null) {
+        d3.select(this.target).on('contextmenu', (e: PointerEvent) => {
+            this.selectionManager.showContextMenu(selectionID, {
+                x: e.clientX,
+                y: e.clientY
+            });
+            e.stopImmediatePropagation();
+            e.preventDefault();
+        });
     }
 }

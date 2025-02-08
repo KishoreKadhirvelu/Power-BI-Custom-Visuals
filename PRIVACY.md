@@ -15,18 +15,18 @@ This Visual operates entirely within the user's Power BI workspace, processing a
 
 **Microsoft's Data Collection:**
 
-Microsoft, as the provider of Power BI, may collect anonymized usage statistics such as download counts and aggregated performance data. This data is subject to Microsoft's privacy policy and is collected for platform analytics and reporting. As the developer, we may have access to certain customer details provided by Microsoft who download the Visual. However, we do not collect, store, or share this information independently. Any data we receive is managed in accordance with applicable privacy and security standards.
+Microsoft, as the provider of Power BI, may collect anonymized usage statistics such as download counts and aggregated performance data. This data is subject to Microsoft's privacy policy and is collected for platform analytics and reporting. As the developer, I may have access to certain customer details provided by Microsoft who download the Visual. However, I do not collect, store, or share this information independently. Any data I receive is managed in accordance with applicable privacy and security standards.
 
 **Data Security:**
 
-While the Visual does not collect or transmit any data, we follow industry-standard secure coding practices to ensure its safe and reliable operation within Power BI.
+While the Visual does not collect or transmit any data, I follow industry-standard secure coding practices to ensure its safe and reliable operation within Power BI.
 
 **Changes to this Privacy Statement:**
 
-We may update this Privacy Statement periodically. Any changes will be posted on this page. We encourage users to review this Privacy Statement regularly.
+I may update this Privacy Statement periodically. Any changes will be posted on this page. I encourage users to review this Privacy Statement regularly.
 
 **Contact Us:**
 
-If you have any questions or concerns regarding this Privacy Statement, please contact us at:
+If you have any questions or concerns regarding this Privacy Statement, please contact me at:
 
 📧 Email: kishorekthilak@gmail.com

@@ -11,6 +11,7 @@ import { IDropdown, ICategorySelection, IProperty, IDataPoint } from './interfac
 import ISelectionId = powerbi.visuals.ISelectionId;
 import ISelectionIdBuilder = powerbi.visuals.ISelectionIdBuilder;
 import ITooltipService = powerbi.extensibility.ITooltipService;
+import VisualObjectInstance = powerbi.VisualObjectInstance
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -30,6 +31,7 @@ export class Visual implements IVisual {
     private legend: legendInterfaces.ILegend
     private selectionIdBuilder: ISelectionIdBuilder;
     private events: IVisualEventService;
+    private persistedProperties;
     private selectionManager
     private container: Selection<SVGElement>;
     private tableContainer: HTMLElement
@@ -55,9 +57,18 @@ export class Visual implements IVisual {
     private tableBorderColor: string
     private tableBorderThickness: number
 
+    private fontSizeAll: number
+    private fontFamilyAll: string
+    private fontBoldAll: boolean
+    private fontUnderlineAll: boolean
+    private fontItalicAll: boolean
+    private fontColorAll: string
+    private displayUnitsPropertyAll: number;
+
     private barColor: string
     private barSelectedCategory: string;
     private barTransparency: number
+    private barTransparencyAll: number
     private barQueryName: string
     private barColors: string[] = ["#FF5733", "#3498DB", "#2ECC71", "#F39C12", "#9B59B6", "#E74C3C", "#1ABC9C", "#F1C40F", "#34495E", "#D35400"]
 
@@ -80,10 +91,11 @@ export class Visual implements IVisual {
     constructor(options: VisualConstructorOptions) {
         this.formattingSettingsService = new FormattingSettingsService();
         this.target = options.element;
-        this.events = options.host.eventService;
+        this.visualHost = options.host;
+        this.events = this.visualHost.eventService;
         this.legend = legend.createLegend(this.target, false, 0);
-        this.selectionIdBuilder = options.host.createSelectionIdBuilder();
-        this.selectionManager = options.host.createSelectionManager();
+        this.selectionIdBuilder = this.visualHost.createSelectionIdBuilder();
+        this.selectionManager = this.visualHost.createSelectionManager();
         this.handleContextMenu();
         this.svg = d3.select(this.target)
             .append('svg')
@@ -98,9 +110,9 @@ export class Visual implements IVisual {
             .attr("transform", `translate(${this.margin.left * 2}, 0)`)
             .attr('class', 'axis')
         this.tooltipService = options.host.tooltipService;
-        this.visualHost = options.host;
         this.tableContainer = document.createElement('div')
         this.tableContainer.classList.add('tableContainer')
+        //this.persistState();
     }
 
     public update(options: VisualUpdateOptions) {
@@ -123,14 +135,14 @@ export class Visual implements IVisual {
 
             //Fetching property values
             this.allProperties = []
-            const fontSizeAll = this.getProperty<number>(selectedSettings, "tableData", "fontSize", 12)
-            const fontFamilyAll = this.getProperty<string>(selectedSettings, "tableData", "fontFamily", "wf_standard-font, helvetica, arial, sans-serif")
-            const fontBoldAll = this.getProperty<boolean>(selectedSettings, "tableData", "fontBold", false)
-            const fontUnderlineAll = this.getProperty<boolean>(selectedSettings, "tableData", "fontUnderline", false)
-            const fontItalicAll = this.getProperty<boolean>(selectedSettings, "tableData", "fontItalic", false)
-            const fontColorAll = this.getProperty<string>(selectedSettings, "tableData", "fontColor", "#000000") === "#000000" ? "#000000" : selectedSettings.tableData.fontColor['solid'].color
-            const displayUnitsPropertyAll = this.getProperty<number>(selectedSettings, "tableData", "displayUnitsProperty", 0)
-            const barTransparencyAll = this.getProperty<number>(selectedSettings, "barData", "transparency", 0)
+            this.fontSizeAll = this.getProperty<number>(selectedSettings, "tableData", "fontSize", 12)
+            this.fontFamilyAll = this.getProperty<string>(selectedSettings, "tableData", "fontFamily", "wf_standard-font, helvetica, arial, sans-serif")
+            this.fontBoldAll = this.getProperty<boolean>(selectedSettings, "tableData", "fontBold", false)
+            this.fontUnderlineAll = this.getProperty<boolean>(selectedSettings, "tableData", "fontUnderline", false)
+            this.fontItalicAll = this.getProperty<boolean>(selectedSettings, "tableData", "fontItalic", false)
+            this.fontColorAll = this.getProperty<string>(selectedSettings, "tableData", "fontColor", "#000000") === "#000000" ? "#000000" : selectedSettings.tableData.fontColor['solid'].color
+            this.displayUnitsPropertyAll = this.getProperty<number>(selectedSettings, "tableData", "displayUnitsProperty", 0)
+            this.barTransparencyAll = this.getProperty<number>(selectedSettings, "barData", "transparency", 0)
 
             allValues.forEach((label, i) => {
                 const currentValue = options.dataViews[0].metadata.columns.filter(item => item.queryName === label.source.queryName)[0].objects
@@ -138,15 +150,15 @@ export class Visual implements IVisual {
                     queryName: <string>label.source.queryName,
                     displayName: <string>label.source.displayName,
                     format: <string>label.source.format,
-                    fontSize : this.getProperty<number>(currentValue,"tableData", "fontSize", fontSizeAll),
-                    fontFamily : this.getProperty<string>(currentValue,"tableData", "fontFamily", fontFamilyAll),
-                    fontBold : this.getProperty<boolean>(currentValue,"tableData", "fontBold", fontBoldAll),
-                    fontUnderline : this.getProperty<boolean>(currentValue,"tableData", "fontUnderline", fontUnderlineAll),
-                    fontItalic : this.getProperty<boolean>(currentValue,"tableData", "fontItalic", fontItalicAll),
-                    fontColor : this.getProperty<string>(currentValue,"tableData", "fontColor", fontColorAll) === fontColorAll ? fontColorAll : currentValue.tableData.fontColor['solid'].color,
-                    displayUnitsProperty : this.getProperty<number>(currentValue,"tableData", "displayUnitsProperty", displayUnitsPropertyAll),
+                    fontSize : this.getProperty<number>(currentValue,"tableData", "fontSize", this.fontSizeAll),
+                    fontFamily : this.getProperty<string>(currentValue,"tableData", "fontFamily", this.fontFamilyAll),
+                    fontBold : this.getProperty<boolean>(currentValue,"tableData", "fontBold", this.fontBoldAll),
+                    fontUnderline : this.getProperty<boolean>(currentValue,"tableData", "fontUnderline", this.fontUnderlineAll),
+                    fontItalic : this.getProperty<boolean>(currentValue,"tableData", "fontItalic", this.fontItalicAll),
+                    fontColor : this.getProperty<string>(currentValue,"tableData", "fontColor", this.fontColorAll) === this.fontColorAll ? this.fontColorAll : currentValue.tableData.fontColor['solid'].color,
+                    displayUnitsProperty : this.getProperty<number>(currentValue,"tableData", "displayUnitsProperty", this.displayUnitsPropertyAll),
                     barColor : this.getProperty<string>(currentValue,"barData", "fontColor", this.barColors[i]) ===  this.barColors[i] ?  this.barColors[i] : currentValue.barData.fontColor['solid'].color,
-                    barTransparency : this.getProperty<number>(currentValue,"barData", "transparency", barTransparencyAll),
+                    barTransparency : this.getProperty<number>(currentValue,"barData", "transparency", this.barTransparencyAll),
                     lineColor: this.getProperty<string>(currentValue,"lineData", "fontColor", this.lineColors[i]) ===  this.lineColors[i] ?  this.lineColors[i] : currentValue.lineData.fontColor['solid'].color,
                     tableSelection: this.getProperty<boolean>(currentValue,"tableData", "showSeries", true),
                     data: label.values,
@@ -254,15 +266,15 @@ export class Visual implements IVisual {
             }   
             
             //Property values based on selection
-            this.tableFontSize = this.getPropertyValue<number>(this.tableQueryName, fontSizeAll, "fontSize")
-            this.tableFontFamily = this.getPropertyValue<string>(this.tableQueryName, fontFamilyAll, "fontFamily")
-            this.tableFontBold = this.getPropertyValue<boolean>(this.tableQueryName, fontBoldAll, "fontBold")
-            this.tableFontUnderline = this.getPropertyValue<boolean>(this.tableQueryName, fontUnderlineAll, "fontUnderline")
-            this.tableFontItalic = this.getPropertyValue<boolean>(this.tableQueryName, fontItalicAll, "fontItalic")
-            this.tableFontColor = this.getPropertyValue<string>(this.tableQueryName, fontColorAll, "fontColor")
-            this.tableDisplayUnits = this.getPropertyValue<number>(this.tableQueryName, displayUnitsPropertyAll, "displayUnitsProperty")
+            this.tableFontSize = this.getPropertyValue<number>(this.tableQueryName, this.fontSizeAll, "fontSize")
+            this.tableFontFamily = this.getPropertyValue<string>(this.tableQueryName, this.fontFamilyAll, "fontFamily")
+            this.tableFontBold = this.getPropertyValue<boolean>(this.tableQueryName, this.fontBoldAll, "fontBold")
+            this.tableFontUnderline = this.getPropertyValue<boolean>(this.tableQueryName, this.fontUnderlineAll, "fontUnderline")
+            this.tableFontItalic = this.getPropertyValue<boolean>(this.tableQueryName, this.fontItalicAll, "fontItalic")
+            this.tableFontColor = this.getPropertyValue<string>(this.tableQueryName, this.fontColorAll, "fontColor")
+            this.tableDisplayUnits = this.getPropertyValue<number>(this.tableQueryName, this.displayUnitsPropertyAll, "displayUnitsProperty")
             this.barColor = this.getPropertyValue<string>(this.barQueryName, this.barColors[0], "barColor")
-            this.barTransparency = this.getPropertyValue<number>(this.barQueryName, barTransparencyAll, "barTransparency")
+            this.barTransparency = this.getPropertyValue<number>(this.barQueryName, this.barTransparencyAll, "barTransparency")
             this.lineColor = this.getPropertyValue<string>(this.lineQueryName, this.lineColors[0], "lineColor")
 
             const formatString: string = this.allProperties[0].format
@@ -563,6 +575,7 @@ export class Visual implements IVisual {
                 this.tableContainer.appendChild(dataTable)
                 this.target.append(this.tableContainer)
             }
+            this.persistState();
             this.events.renderingFinished(options);
         }
         catch (e) {
@@ -915,5 +928,101 @@ export class Visual implements IVisual {
             e.stopImmediatePropagation();
             e.preventDefault();
         });
+    }
+
+    private persistState(): void {
+      const objects = []
+      this.allProperties.forEach(item => {
+      const tableProperties = {
+            objectName: "tableData",
+            selector: item.queryName,
+            properties: {
+                "fontSize": item.fontSize,
+                "fontFamily": item.fontFamily,
+                "fontBold": item.fontBold,
+                "fontUnderline": item.fontUnderline,
+                "fontItalic": item.fontItalic,
+                "fontColor": item.fontColor,
+                "displayUnitsProperty": item.displayUnitsProperty,
+                "showSeries": item.tableSelection
+            }
+         }
+      
+      const barProperties = {
+            objectName: "barData",
+            selector: item.queryName,
+            properties: {
+            "fontColor": this.barColor,
+            "transparency": item.barTransparency
+            }
+        }
+
+      const lineProperties = {
+            objectName: "lineData",
+            selector: item.queryName,
+            properties: {
+            "fontColor": this.lineColor
+            }
+        }
+         objects.push(tableProperties)
+         objects.push(barProperties)
+         objects.push(lineProperties)
+       })
+
+       const instances: VisualObjectInstance[] = [
+        {   
+            objectName: "tableData",
+            selector : null,
+            properties: {
+                "fontSize": this.fontSizeAll,
+                "fontFamily": this.fontFamilyAll,
+                "fontBold": this.fontBoldAll,
+                "fontUnderline": this.fontUnderlineAll,
+                "fontItalic": this.fontItalicAll,
+                "fontColor": this.fontColorAll,
+                "displayUnitsProperty": this.displayUnitsPropertyAll,
+                "showSeries": true,
+                "borderColor": this.tableBorderColor,
+                "borderThickness": this.tableBorderThickness,
+            }
+        },
+        {   
+            objectName: "barData",
+            selector : null,
+            properties: {
+                "fontColor": this.barColors[0],
+                "transparency": this.barTransparencyAll,
+            }
+        },
+        {   
+            objectName: "lineData",
+            selector : null,
+            properties: {
+                "fontColor": this.lineColors[0]
+            }
+        },
+        {   
+            objectName: "dataLabels",
+            selector : null,
+            properties: {
+                "series": this.dataLabelsSeries
+            }
+        },
+        {   
+            objectName: "legend",
+            selector : null,
+            properties: {
+                "series": this.legendSeries,
+                "position": this.legendPosition
+            }
+        }
+    ]
+
+    if (JSON.stringify(this.persistedProperties) !== JSON.stringify(instances)) {
+        this.visualHost.persistProperties({
+            merge: [...instances, ...objects]
+        })
+        this.persistedProperties = instances; 
+    }
     }
 }

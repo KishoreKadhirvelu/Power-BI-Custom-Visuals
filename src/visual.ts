@@ -71,6 +71,7 @@ export class Visual implements IVisual {
     private barTransparencyAll: number
     private barQueryName: string
     private barColors: string[] = ["#FF5733", "#3498DB", "#2ECC71", "#F39C12", "#9B59B6", "#E74C3C", "#1ABC9C", "#F1C40F", "#34495E", "#D35400"]
+    private yAxisDisplayUnits: number
 
     private lineColor: string
     private lineSelectedCategory: string;
@@ -79,6 +80,10 @@ export class Visual implements IVisual {
     private dataLabelsSeries: boolean
     private legendSeries: boolean
     private legendPosition: string
+    private lineStyleAll: string
+    private lineStyle: string
+    private markerSizeAll: number
+    private markerSize: number
 
     private tooltipService: ITooltipService;
     private categorySelection: ICategorySelection[]
@@ -135,7 +140,7 @@ export class Visual implements IVisual {
 
             //Fetching property values
             this.allProperties = []
-            this.fontSizeAll = this.getProperty<number>(selectedSettings, "tableData", "fontSize", 12)
+            this.fontSizeAll = this.getProperty<number>(selectedSettings, "tableData", "fontSize", 10)
             this.fontFamilyAll = this.getProperty<string>(selectedSettings, "tableData", "fontFamily", "wf_standard-font, helvetica, arial, sans-serif")
             this.fontBoldAll = this.getProperty<boolean>(selectedSettings, "tableData", "fontBold", false)
             this.fontUnderlineAll = this.getProperty<boolean>(selectedSettings, "tableData", "fontUnderline", false)
@@ -143,6 +148,8 @@ export class Visual implements IVisual {
             this.fontColorAll = this.getProperty<string>(selectedSettings, "tableData", "fontColor", "#000000") === "#000000" ? "#000000" : selectedSettings.tableData.fontColor['solid'].color
             this.displayUnitsPropertyAll = this.getProperty<number>(selectedSettings, "tableData", "displayUnitsProperty", 0)
             this.barTransparencyAll = this.getProperty<number>(selectedSettings, "barData", "transparency", 0)
+            this.lineStyleAll = this.getProperty<string>(selectedSettings, "lineData", "style", "0")
+            this.markerSizeAll = this.getProperty<number>(selectedSettings, "lineData", "marker", 1)
 
             allValues.forEach((label, i) => {
                 const currentValue = options.dataViews[0].metadata.columns.filter(item => item.queryName === label.source.queryName)[0].objects
@@ -160,6 +167,8 @@ export class Visual implements IVisual {
                     barColor : this.getProperty<string>(currentValue,"barData", "fontColor", this.barColors[i]) ===  this.barColors[i] ?  this.barColors[i] : currentValue.barData.fontColor['solid'].color,
                     barTransparency : this.getProperty<number>(currentValue,"barData", "transparency", this.barTransparencyAll),
                     lineColor: this.getProperty<string>(currentValue,"lineData", "fontColor", this.lineColors[i]) ===  this.lineColors[i] ?  this.lineColors[i] : currentValue.lineData.fontColor['solid'].color,
+                    lineStyle: this.getProperty<string>(currentValue,"lineData", "style", this.lineStyleAll),
+                    markerSize: this.getProperty<number>(currentValue,"lineData", "marker", this.markerSizeAll),
                     tableSelection: this.getProperty<boolean>(currentValue,"tableData", "showSeries", true),
                     data: label.values,
                     category: allCategories,
@@ -173,7 +182,7 @@ export class Visual implements IVisual {
             const legendData = {
                 dataPoints: [],
                 labelColor: "black",
-                fontSize: 10
+                fontSize: 8
             };
             for (let categoryIndex = 0; categoryIndex < allCategories.length; categoryIndex++) {
                 for (let measureIndex = 0; measureIndex < allValues.length; measureIndex++) {
@@ -232,6 +241,9 @@ export class Visual implements IVisual {
             this.legendSeries = this.getProperty<boolean>(selectedSettings, "legend", "series", true)
             this.legendPosition = this.getProperty<string>(selectedSettings, "legend", "position", "0")
 
+            //Y Axis
+            this.yAxisDisplayUnits = this.getProperty<number>(selectedSettings, "barData", "displayUnitsProperty", 0)
+
             //Legend Selection        
             if(this.legendSeries){
                 this.legend.changeOrientation(Number(this.legendPosition))
@@ -276,6 +288,8 @@ export class Visual implements IVisual {
             this.barColor = this.getPropertyValue<string>(this.barQueryName, this.barColors[0], "barColor")
             this.barTransparency = this.getPropertyValue<number>(this.barQueryName, this.barTransparencyAll, "barTransparency")
             this.lineColor = this.getPropertyValue<string>(this.lineQueryName, this.lineColors[0], "lineColor")
+            this.lineStyle = this.getPropertyValue<string>(this.lineQueryName, this.lineStyleAll, "lineStyle")
+            this.markerSize = this.getPropertyValue<number>(this.lineQueryName, this.markerSizeAll, "markerSize")
 
             const formatString: string = this.allProperties[0].format
             const dataViewMetadataColumn: powerbi.DataViewMetadataColumn[] = this.allProperties.map(item => {
@@ -287,7 +301,7 @@ export class Visual implements IVisual {
             const getMin: number = Math.min(...this.allProperties.flatMap(item => item.data));
             let minValue: number = getMin >= 0 ? 0 : getMin - Math.abs(((maxValue - getMin) / axis.getBestNumberOfTicks(getMin, maxValue, dataViewMetadataColumn, 5)))
             maxValue = minValue < 0 && maxValue < 0 ? 0 : maxValue
-            const maxFontSize: number= this.totalTableRows.length > 0 ? Math.max(...this.allProperties.filter(item => item.tableSelection).map(item => item.fontSize)) : 12
+            const maxFontSize: number= this.totalTableRows.length > 0 ? Math.max(...this.allProperties.filter(item => item.tableSelection).map(item => item.fontSize)) : 10
             const offSet: number = maxFontSize < 12 ? 2 : 1.75
 
             let width: number = options.viewport.width
@@ -342,7 +356,7 @@ export class Visual implements IVisual {
             const yAxis = this.yAxis
                             .call(d3.axisLeft(yScale)
                                     .ticks(axis.getBestNumberOfTicks(minValue, maxValue, dataViewMetadataColumn, 5))
-                                    .tickFormat(d => this.getAutoNumber(formatString, d))
+                                    .tickFormat(d => this.formatDataLabelText(this.yAxisDisplayUnits, formatString, Number(d)))
                                     .tickSize(14))
                             .style('display', 'block')
                             .selectAll(".tick line, .domain")
@@ -421,6 +435,7 @@ export class Visual implements IVisual {
             const lineBandwidth = (xScale.bandwidth() - padding);
             this.filterProperty('role', "Lines").forEach(line => {
                 const data = this.getDataPoints(line)
+                const category = this.filterProperty("queryName", line.queryName, this.categorySelection)
                 let splitData = [], //Splitting data to handle null values
                 currentItem = [] 
                 data.forEach( item => {
@@ -442,17 +457,58 @@ export class Visual implements IVisual {
                     .datum(item)
                     .append('path')
                     .attr("d", d3.line()
-                                .x(d => xScale(d['name']) + (lineBandwidth / 2) + padding)
+                                .x(d => xScale(d['name']) + (lineBandwidth / 2) + (padding / 2))
                                 .y(d => yScale(d['value']) - this.margin.top)
                     )
                     .attr("class", line.displayName)
                     .style('stroke', line.lineColor)
-                    .style('stroke-width', '2')
+                    .style('stroke-width', '3')
                     .style('fill', 'none')
-                    .attr("stroke-dasharray", "10, 2")
+                    .attr("stroke-dasharray", `10, ${line.lineStyle}`)
+
+                    //Marker
+                    this.container
+                    .selectAll('marker')
+                    .data(item)
+                    .enter()
+                    .append('circle')
+                    .attr("class", line.displayName)
+                    .attr('cx', d => {
+                        return xScale(d['name']) + (lineBandwidth / 2) + (padding / 2)
+                    })
+                    .attr('cy', d => {
+                        return yScale(d['value']) - this.margin.top
+                    })
+                    .attr("r", line.markerSize)
+                    .style('stroke', line.lineColor)
+                    .style('stroke-width', '3')
+                    .style('fill', line.lineColor)
+                    .on("click", (e, d) => {
+                        const categorySelection = category[allCategories.indexOf(d['name'])]
+                        this.handleClick(categorySelection.selection, line.displayName)
+                        e.stopImmediatePropagation()
+                    })
+                    .on("mouseout", () => {
+                        this.tooltipService.hide({ isTouchEvent: false, immediately: true });
+                    })
+                    .on('mouseover', (e, d) => {
+                        this.tooltipService.show({
+                            dataItems: [
+                                { displayName: "Category", value: d['name'] },
+                                { displayName: line.displayName, value: this.formatValue(line.format, null, d['value'], 2) }
+                            ],
+                            coordinates: [e.clientX, e.clientY],
+                            isTouchEvent: false,
+                            identities: line.selection
+                        })
+                    })
+                    .on('contextmenu', (e, d) => {
+                        const categorySelection = category[allCategories.indexOf(d['name'])]
+                        this.handleContextMenu(categorySelection.selection)
+                    })
                 })
             })
-
+           
             //Data Labels
             if (this.dataLabelsSeries) {
                 currentBarBandwidth = 0;
@@ -479,13 +535,13 @@ export class Visual implements IVisual {
                         })
                         .attr("stroke", label.role === "Bars" ? label.barColor : label.lineColor)
                         .attr("stroke-width", 0.5)
-                        .style("font-size", "12px")
+                        .style("font-size", "10px")
                         .each(function (d) {
                             const textWidth = this.getBBox().width
                             const width = xScale(d['name']) - (textWidth / 2)
                             d3.select(this)
                             .attr("x", label.role === "Bars" ? width + ((padding + bandwidth) / 2) + currentBarBandwidth 
-                                                            : width + padding + (lineBandwidth / 2))
+                                                             : width + (padding / 2) + (lineBandwidth / 2))
                             .text(textWidth > bandwidth ? "" : this.textContent)
                         })
                         .attr('class', 'dataLabel')
@@ -526,27 +582,8 @@ export class Visual implements IVisual {
                     for (var j = 0; j < allCategories.length; j++) {
                         const dataCol = document.createElement('td')
                         let text = selectedText.data[j]
-                        let formattedValue;
+                        const formattedValue =this.formatDataLabelText(selectedText.displayUnitsProperty, selectedText.format, text)
 
-                        switch (selectedText.displayUnitsProperty) {
-                            case 0:
-                                formattedValue = this.getAutoNumber(selectedText.format, text);
-                                break;
-                            case 1000:
-                                formattedValue = this.formatValue(selectedText.format, 1001, text, 2);
-                                break;
-                            case 1000000:
-                                formattedValue = this.formatValue(selectedText.format, 1e6, text, 2);
-                                break;
-                            case 1000000000:
-                                formattedValue = this.formatValue(selectedText.format, 1e9, text, 2);
-                                break;
-                            case 1000000000000:
-                                formattedValue = this.formatValue(selectedText.format, 1e12, text, 2);
-                                break;
-                            default:
-                                formattedValue = this.formatValue(selectedText.format, null, text, 2);
-                        }
                         dataCol.innerText = text === null ? "" : formattedValue
                         this.styleElement(dataCol, styleAttributes)
                         dataCol.style.border = `${this.tableBorderThickness / 20}px solid ${this.tableBorderColor}`
@@ -584,7 +621,7 @@ export class Visual implements IVisual {
     }
 
     public removeElements(): void {
-        d3.selectAll('rect, table, path, .dataLabel, .legendItem')
+        d3.selectAll('rect, table, path, .dataLabel, .legendItem, circle')
             .remove()
 
         d3.selectAll('.axis')
@@ -710,14 +747,33 @@ export class Visual implements IVisual {
         lineDropdown['control']['properties']['mergeValues'] = lineDropDownCategories as powerbi.IEnumMember[]
         const lineColor = this.getFormattingSlice(powerbi.visuals.FormattingComponent.ColorPicker, "line_color_uid", "Color", "lineData", "fontColor", lineFormatOptionsSelector, { value: this.lineColor })
         lineColor['disabled'] =  this.lineSelectedCategory === "0" ? true : false
+        const lineStyleDropdown = this.getFormattingSlice(powerbi.visuals.FormattingComponent.Dropdown, "Style_line_uid", "Style", "lineData", "style", lineFormatOptionsSelector, this.lineStyle)
+        const markerSize = this.getFormattingSlice(powerbi.visuals.FormattingComponent.NumUpDown, "marker_size_uid", "Marker", "lineData", "marker", lineFormatOptionsSelector, this.markerSize)
+        const markerSizeProperties = {
+            unitSymbol: "px",
+            unitSymbolAfterInput: false,
+            minValue: {
+                type: powerbi.visuals.ValidatorType.Min,
+                value: 0,
+            },
+            maxValue: {
+                type: powerbi.visuals.ValidatorType.Max,
+                value: 10,
+            }
+        }
+        markerSize['control']['properties']['options'] = markerSizeProperties as powerbi.visuals.NumUpDownFormat
         let line1_dataFont = this.getFormattingGroup("Apply settings to", "settings_line_group_uid", [lineDropdown])
-        let line2_dataFont = this.getFormattingGroup("Color", "line_Properties_group_uid", [lineColor])
+        let line2_dataFont = this.getFormattingGroup("Line", "line_Properties_group_uid", [lineColor, lineStyleDropdown, markerSize])
 
         //Legend
         let legend_dataFont = this.getFormattingGroup('Options', 'position_legend_uid', 
                                                      [this.getFormattingSlice(powerbi.visuals.FormattingComponent.Dropdown, "Legend_uid", "Position", "legend", "position", null, this.legendPosition)])
 
+        //yAxis
+        let yaAxis_dataFont = this.getFormattingGroup('Display Units', 'display_units_yAxis', [this.getFormattingSlice(powerbi.visuals.FormattingComponent.Dropdown, "yAxis_fontControl_displayUnits_uid", "Display units", "barData", "displayUnitsProperty", null, this.yAxisDisplayUnits) ])
+
         const groups = [
+            { role: "yAxis", group: [yaAxis_dataFont], displayName : "Y-Axis"},
             { role: "bar", group: [bar1_dataFont, bar2_dataFont], displayName : "Bar" },
             { role: "line", group: [line1_dataFont, line2_dataFont], displayName : "Line" },
             { role: "table", group: [table1_dataFont, table2_dataFont, table3_dataFont], displayName : "Table" },
@@ -848,7 +904,7 @@ export class Visual implements IVisual {
                                     color: item.fontColor,
                                     borderColor: 'black',
                                     fillOpacity: `${(100 - item.barTransparency) / 100}`,
-                                    strokeWidth: '2'
+                                    strokeWidth: '3'
                                 }
                                 this.resetSelection(resetRow, resetAttributes)
                             })
@@ -857,7 +913,7 @@ export class Visual implements IVisual {
                                 color: highlightClass[0].fontColor,
                                 fontWeight: 'normal',
                                 fillOpacity: `${(100 - highlightClass[0].barTransparency) / 100}`,
-                                strokeWidth: '2'
+                                strokeWidth: '3' 
                             }
                             this.resetSelection(selectedRow, highlightAttributes)
                         })
@@ -930,6 +986,25 @@ export class Visual implements IVisual {
         });
     }
 
+    private formatDataLabelText(displayUnitsProperty: number, format: string, value: number): string {
+        switch (displayUnitsProperty) {
+            case 0:
+                return this.getAutoNumber(format, value);
+            case 1000:
+                return this.formatValue(format, 1001, value, 2);
+            case 1000000:
+                return this.formatValue(format, 1e6, value, 2);
+            case 1000000000:
+                return this.formatValue(format, 1e9, value, 2);
+                break;
+            case 1000000000000:
+                return this.formatValue(format, 1e12, value, 2);
+                break;
+            default:
+                return this.formatValue(format, null, value, 2);
+        }
+    }
+
     private persistState(): void {
       const objects = []
       this.allProperties.forEach(item => {
@@ -961,7 +1036,9 @@ export class Visual implements IVisual {
             objectName: "lineData",
             selector: item.queryName,
             properties: {
-            "fontColor": this.lineColor
+            "fontColor": this.lineColor,
+            "style": this.lineStyle,
+            "marker": this.markerSize
             }
         }
          objects.push(tableProperties)
@@ -992,13 +1069,16 @@ export class Visual implements IVisual {
             properties: {
                 "fontColor": this.barColors[0],
                 "transparency": this.barTransparencyAll,
+                "displayUnitsProperty": this.yAxisDisplayUnits
             }
         },
         {   
             objectName: "lineData",
             selector : null,
             properties: {
-                "fontColor": this.lineColors[0]
+                "fontColor": this.lineColors[0],
+                "style": this.lineStyleAll,
+                "marker": this.markerSizeAll
             }
         },
         {   

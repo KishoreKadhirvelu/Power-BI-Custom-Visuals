@@ -405,7 +405,7 @@ export class Visual implements IVisual {
             
             //YAxis Range
             let maxValue: number = Math.max(...this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null));
-            const getMin: number = Math.min(...this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null));
+            const getMin: number = 0//Math.min(...this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null));
             var adjustedHeight = 0;
             let minValue: number;
             let barRules = options.dataViews[0].categorical.categories[0].objects;

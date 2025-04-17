@@ -112,6 +112,14 @@
                          "numeric": true
                     }
                 },
+                "displayUnitsProperty": {
+                    "type":
+                    {
+                        "formatting": {
+                            "labelDisplayUnits": true
+                        }
+                    }
+                },
                 "yAxisMin": {
                     "type": {
                          "numeric": true

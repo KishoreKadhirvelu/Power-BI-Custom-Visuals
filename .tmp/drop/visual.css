@@ -25,10 +25,6 @@ td {
   text-align: center;
   border: none;
 }
-td {
-  border: 1px solid;
-  border-color: black;
-}
 .list-container {
   width: 1000px;
   /* Set a fixed width for the container */
@@ -44,3 +40,5 @@ ul li {
   border-color: black;
 }
 
+
+/*# sourceMappingURL=https://localhost:8080/assets/visual.css.map*/

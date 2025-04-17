@@ -29,6 +29,20 @@
                         "bool": true
                     }
                 },
+                "borderColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borderThickness": {
+                    "type": {
+                         "numeric": true
+                    }
+                },
                 "displayUnitsProperty": {
                     "type":
                     {
@@ -105,12 +119,104 @@
                 },
                 "yAxisMax": {
                     "type": {
-                         "numeric": true
+                         "numeric":true
                     }
                 },
-                "dataLabels":{
+                "useConditionalFormatting": {
+                    "type":{
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "yAxis": {
+            "properties": {
+                "displayUnitsProperty": {
+                    "type":
+                    {
+                        "formatting": {
+                            "labelDisplayUnits": true
+                        }
+                    }
+                },
+                "fontSize": { 
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "fontFamily": {
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "fontBold": {
                     "type": {
                         "bool": true
+                    }
+                },
+                "fontUnderline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontItalic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "xAxis": {
+            "properties": {
+                "fontSize": { 
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "fontFamily": {
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "fontBold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontUnderline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontItalic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
                     }
                 }
             }
@@ -120,6 +226,166 @@
                 "categoryProperty": {
                     "type":{
                         "enumeration": []
+                    }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "lineSize":{
+                    "type": {
+                         "numeric": true
+                    }
+                },
+                "style":{
+                    "type":{
+                        "enumeration": [{
+                            "value": "0",
+                            "displayName": "Solid"
+                        },
+                        {
+                            "value": "2",
+                            "displayName": "Dotted"
+                        }]
+                    }
+                },
+                "marker":{
+                    "type": {
+                         "numeric": true
+                    }
+                },
+                "markerShape":{
+                    "type":{
+                        "enumeration": [
+                            {
+                                "value": "0",
+                                "displayName": "●"
+                            },
+                            {
+                                "value": "1",
+                                "displayName": "■"
+                            },
+                            {
+                                "value": "2",
+                                "displayName": "▲"
+                            },
+                            {
+                                "value": "3",
+                                "displayName": "♦"
+                            },
+                            {
+                                "value": "4",
+                                "displayName": "X"
+                            },
+                            {
+                                "value": "5",
+                                "displayName": "+"
+                            },
+                            {
+                                "value": "6",
+                                "displayName": "—"
+                            }]
+                    }
+                },
+                "showSeries":{
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "legend": {
+            "properties": {
+                "position": {
+                    "type":{
+                        "enumeration": [{
+                            "value": "0",
+                            "displayName": "Top left"
+                        },
+                        {
+                            "value": "5",
+                            "displayName": "Top center"
+                        }]
+                    }
+                },
+                "series": {
+                    "type":{
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "dataLabels": {
+            "properties": {
+                "categoryProperty": {
+                    "type":{
+                        "enumeration": []
+                    }
+                },
+                "showSeries": {
+                    "type":{
+                        "bool": true
+                    }
+                },
+                "series": {
+                    "type":{
+                        "bool": true
+                    }
+                },
+                "borderColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borderThickness": {
+                    "type": {
+                         "numeric": true
+                    }
+                },
+                "displayUnitsProperty": {
+                    "type":
+                    {
+                        "formatting": {
+                            "labelDisplayUnits": true
+                        }
+                    }
+                },
+                "fontSize": { 
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "fontFamily": {
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "fontBold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontUnderline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontItalic": {
+                    "type": {
+                        "bool": true
                     }
                 },
                 "fontColor": {

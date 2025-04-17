@@ -404,8 +404,8 @@ export class Visual implements IVisual {
             })
             
             //YAxis Range
-            let maxValue: number = Math.max(...this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null));
-            const getMin: number = Math.min(...this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null));
+            let maxValue: number = Math.max(...this.getMinMaxValue());
+            const getMin: number = Math.min(...this.getMinMaxValue());
             var adjustedHeight = 0;
             let minValue: number;
             let barRules = options.dataViews[0].categorical.categories[0].objects;
@@ -1105,6 +1105,10 @@ export class Visual implements IVisual {
         options['instanceKind'] = powerbi.VisualEnumerationInstanceKinds.ConstantOrRule 
 
         return options
+    }
+
+    private getMinMaxValue(){
+        return this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null)
     }
 
     private getGradientColor(linearGradient, value: number, minValue, maxValue): string{

@@ -373,7 +373,7 @@ export class Visual implements IVisual {
             });
             }   
             
-            //Property values based on selection
+            //Property values based on user selection
             this.tableFontSize = this.getPropertyValue<number>(this.tableQueryName, this.fontSizeAll, "fontSize")
             this.tableFontFamily = this.getPropertyValue<string>(this.tableQueryName, this.fontFamilyAll, "fontFamily")
             this.tableFontBold = this.getPropertyValue<boolean>(this.tableQueryName, this.fontBoldAll, "fontBold")

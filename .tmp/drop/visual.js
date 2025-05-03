@@ -347,7 +347,7 @@ class Visual {
                     e.stopImmediatePropagation();
                 });
             }
-            //Property values based on selection
+            //Property values based on user selection
             this.tableFontSize = this.getPropertyValue(this.tableQueryName, this.fontSizeAll, "fontSize");
             this.tableFontFamily = this.getPropertyValue(this.tableQueryName, this.fontFamilyAll, "fontFamily");
             this.tableFontBold = this.getPropertyValue(this.tableQueryName, this.fontBoldAll, "fontBold");
@@ -375,8 +375,8 @@ class Visual {
                 return { displayName: item.displayName };
             });
             //YAxis Range
-            let maxValue = Math.max(...this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null));
-            const getMin = Math.min(...this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null));
+            let maxValue = Math.max(...this.getMinMaxValue());
+            const getMin = Math.min(...this.getMinMaxValue());
             var adjustedHeight = 0;
             let minValue;
             let barRules = options.dataViews[0].categorical.categories[0].objects;
@@ -989,6 +989,9 @@ class Visual {
             options['altConstantValueSelector'] = null,
             options['instanceKind'] = 3 /* powerbi.VisualEnumerationInstanceKinds.ConstantOrRule */;
         return options;
+    }
+    getMinMaxValue() {
+        return this.allProperties.filter(item => item.lineSelection || item.role === "Bars").flatMap(item => item.data).filter(item => item !== null);
     }
     getGradientColor(linearGradient, value, minValue, maxValue) {
         const linearGradientMinData = linearGradient["fontColor"]["gradient"]["options"]["linearGradient2"]["min"];

@@ -108,6 +108,7 @@ export declare class Visual implements IVisual {
     getFormattingSlice(type: any, uid: any, displayName: any, objectName: any, propertyName: any, selector: any, value: any): powerbi.visuals.FormattingSlice;
     private fontProperties;
     private addConditionalFormattingOptions;
+    private getMinMaxValue;
     private getGradientColor;
     private getRules;
     private fontSlice;

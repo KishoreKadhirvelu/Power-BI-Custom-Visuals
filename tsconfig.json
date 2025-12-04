@@ -7,7 +7,6 @@
         "sourceMap": true,
         "outDir": "./.tmp/build/",
         "moduleResolution": "node",
-        "ignoreDeprecations": "6.0",
         "declaration": true,
         "lib": [
             "es2022",

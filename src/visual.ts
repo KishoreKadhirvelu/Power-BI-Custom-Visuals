@@ -3,7 +3,7 @@
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import { legend, legendInterfaces } from 'powerbi-visuals-utils-chartutils';
-//import "./../style/visual.less";
+import "./../style/visual.less";
 import { axis, dataLabelUtils } from "powerbi-visuals-utils-chartutils";
 import { displayUnitSystem, font, valueFormatter } from "powerbi-visuals-utils-formattingutils";
 import { IValueFormatter } from "powerbi-visuals-utils-formattingutils/lib/src/valueFormatter";
@@ -100,7 +100,6 @@ export class Visual implements IVisual {
     private lineColors: string[] = ["red", "#193be6", "#90EE90", "#ADD8E6", "#D8BFD8", "#F08080", "#AFEEEE", "#FAFAD2", "#D3D3D3", "#FFE4C4"]
     private legendSeries: boolean
     private legendPosition: string
-    private legendFontColor: string
     private lineStyleAll: string
     private lineStyle: string
     private lineSizeAll: number
@@ -250,15 +249,10 @@ export class Visual implements IVisual {
                 this.allProperties.push(item)
             })
 
-            //Legend Properties
-            this.legendSeries = this.getProperty<boolean>(selectedSettings, "legend", "series", true)
-            this.legendPosition = this.getProperty<string>(selectedSettings, "legend", "position", "0")
-            this.legendFontColor = this.getProperty<string>(selectedSettings, "legend", "fontColor", "#000000") ===  "#000000" ?  "#000000" : selectedSettings.legend.fontColor['solid'].color
-
             this.categorySelection = []
             const legendData = {
                 dataPoints: [],
-                labelColor: this.legendFontColor,
+                labelColor: "black",
                 fontSize: 8
             };
             for (let categoryIndex = 0; categoryIndex < allCategories.length; categoryIndex++) {
@@ -321,6 +315,10 @@ export class Visual implements IVisual {
             const dataLabelSelectedCategory = String(this.getProperty<string>(selectedSettings, "dataLabels", "categoryProperty", "0"))
             this.dataLabelSelectedCategory = Number(dataLabelSelectedCategory) > this.totalBars.length + this.totalLines.length ? "0" : dataLabelSelectedCategory
             this.dataLabelQueryName = this.dataLabelSelectedCategory === "0" ? "All" : this.allProperties[Number(this.dataLabelSelectedCategory) - 1].queryName
+
+            //Legend Properties
+            this.legendSeries = this.getProperty<boolean>(selectedSettings, "legend", "series", true)
+            this.legendPosition = this.getProperty<string>(selectedSettings, "legend", "position", "0")
 
             //Y-Axis
             this.yAxisMin = this.getProperty<number>(selectedSettings, "barData", "yAxisMin", null)
@@ -725,7 +723,7 @@ export class Visual implements IVisual {
                                 return d['value'] < 0 ? val + 20 : val - 5
                             })
                             .attr("stroke", label.dataLabelFontColor)
-                            //.attr("stroke-width", label.dataLabelSelection ? 0.1 : 0)
+                            .attr("stroke-width", label.dataLabelSelection ? 0.5 : 0)
                             .style("font-size", label.dataLabelSelection ? label.dataLabelFontSize : 0 + "px")
                             .style('Color', label.dataLabelFontColor)
                             .style('font-Family', label.dataLabelFontFamily)
@@ -979,10 +977,8 @@ export class Visual implements IVisual {
         line3_dataFont['disabled'] = this.lineSelectedCategory === "0" ? false : !this.filterProperty("queryName", this.lineQueryName)[0].lineSelection
 
         //Legend
-        let legend_position = this.getFormattingSlice(powerbi.visuals.FormattingComponent.Dropdown, "Legend_uid", "Position", "legend", "position", null, this.legendPosition)
-        let legend_fontColor = this.getFormattingSlice(powerbi.visuals.FormattingComponent.ColorPicker, "legend_color_uid", "Color", "legend", "fontColor", null, { value: this.legendFontColor })
-        let legend_dataFont = this.getFormattingGroup('Options', 'position_legend_uid', [legend_position, legend_fontColor])
-        
+        let legend_dataFont = this.getFormattingGroup('Options', 'position_legend_uid', [this.getFormattingSlice(powerbi.visuals.FormattingComponent.Dropdown, "Legend_uid", "Position", "legend", "position", null, this.legendPosition)])
+
         //Y-Axis
         let yAxisMinSlice = this.getFormattingSlice(powerbi.visuals.FormattingComponent.NumUpDown, "yAxis_min_range_uid", "Minimum", "barData", "yAxisMin", null, this.yAxisMin);
         yAxisMinSlice['control']['properties']['descriptor'] = this.addConditionalFormattingOptions(yAxisMinSlice)
@@ -1532,8 +1528,7 @@ export class Visual implements IVisual {
             selector : null,
             properties: {
                 "series": this.legendSeries,
-                "position": this.legendPosition,
-                "fontColor": this.legendFontColor
+                "position": this.legendPosition
             }
         }
     ]

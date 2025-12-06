@@ -3,7 +3,7 @@
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import { legend, legendInterfaces } from 'powerbi-visuals-utils-chartutils';
-//import "./../style/visual.less";
+import "./../style/visual.less";
 import { axis, dataLabelUtils } from "powerbi-visuals-utils-chartutils";
 import { displayUnitSystem, font, valueFormatter } from "powerbi-visuals-utils-formattingutils";
 import { IValueFormatter } from "powerbi-visuals-utils-formattingutils/lib/src/valueFormatter";
@@ -724,8 +724,9 @@ export class Visual implements IVisual {
                                 const val = yScale(d['value']) - this.margin.top
                                 return d['value'] < 0 ? val + 20 : val - 5
                             })
-                            .attr("stroke", label.dataLabelFontColor)
-                            //.attr("stroke-width", label.dataLabelSelection ? 0.1 : 0)
+                            .style("stroke", label.dataLabelFontColor)
+                            .attr("stroke-width", label.dataLabelSelection ? 0.1 : 0)
+                            .style("fill", label.dataLabelFontColor)
                             .style("font-size", label.dataLabelSelection ? label.dataLabelFontSize : 0 + "px")
                             .style('Color', label.dataLabelFontColor)
                             .style('font-Family', label.dataLabelFontFamily)

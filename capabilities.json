@@ -3,17 +3,38 @@
         {
             "displayName": "Category",
             "name": "category",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "requiredTypes": [
+            {
+                "text": true
+            }
+        ]
         },
         {
             "displayName": "Bar Values",
             "name": "Bars",
-            "kind": "Measure"
+            "kind": "Measure",
+            "requiredTypes": [
+            {
+                "numeric": true
+            },
+            {
+                "integer": true
+            }
+        ]
         },
         {   
             "displayName": "Line Values",
             "name": "Lines",
-            "kind": "Measure"
+            "kind": "Measure",
+            "requiredTypes": [
+            {
+                "numeric": true
+            },
+            {
+                "integer": true
+            }
+        ]
         } 
     ],
     "objects": {
@@ -324,15 +345,6 @@
                 "series": {
                     "type":{
                         "bool": true
-                    }
-                },
-                "fontColor": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
                     }
                 }
             }

@@ -1268,9 +1268,13 @@ export class Visual implements IVisual {
                             })
 
                             const highlightAttributes = {
-                                color: highlightClass[0].fontColor,
+                                ...(highlightClass.length !== 0 && {
+                                    color: highlightClass[0].fontColor
+                                }),
                                 fontWeight: 'normal',
-                                fillOpacity: `${(100 - highlightClass[0].barTransparency) / 100}`,
+                                ...(highlightClass.length !== 0 && {
+                                    fillOpacity: (100 - highlightClass[0].barTransparency) / 100
+                                }),
                                 strokeWidth: '3' 
                             }
                             this.resetSelection(selectedRow, highlightAttributes)

@@ -346,6 +346,15 @@
                     "type":{
                         "bool": true
                     }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
                 }
             }
         },

@@ -4,7 +4,7 @@
     "displayName":"Bar and Line Chart with Table",
     "guid":"barAndLineChartWithTableC51A8F083FFA4AD1B56D590728B72F84",
     "visualClassName":"Visual",
-    "version":"1.0.0.7",
+    "version":"1.0.0.8",
     "description":"Bar and Line Chart with Table",
     "supportUrl":"https://community.powerbi.com",
     "gitHubUrl":""},
@@ -21,5 +21,5 @@
     "capabilities":"capabilities.json",
     "dependencies":null,
     "stringResources":[],
-    "version":"1.0.0.0"
+    "version":"1.0.0.8"
 }
